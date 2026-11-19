@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "agen_flutter (Chrome)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "chrome"
+    },
+    {
+      "name": "agen_flutter (Edge)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "edge"
+    }
+  ]
+}
