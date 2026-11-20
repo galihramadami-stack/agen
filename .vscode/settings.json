@@ -1,3 +1,4 @@
 {
-  "dart.flutterDefaultDevice": "chrome"
+  "dart.flutterDefaultDevice": "chrome",
+  "java.configuration.updateBuildConfiguration": "interactive"
 }

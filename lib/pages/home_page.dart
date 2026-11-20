@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import '../models/agen_vaLorant.dart';
+
+import '../models/valorant_agent.dart';
 import '../services/api_service.dart';
 import '../routes/app_routing.dart';
+import '../utils/agent_filter.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -35,25 +37,7 @@ class _HomePageState extends State<HomePage> {
   void _onTabSelected(String tab) {
     setState(() {
       _selectedTab = tab;
-      if (tab == 'Popular') {
-        _filteredAgents = _allAgents;
-      } else if (tab == 'New One') {
-        _filteredAgents = List.from(_allAgents)
-          ..sort((a, b) {
-            if (a.releaseDate == null) return 1;
-            if (b.releaseDate == null) return -1;
-            return b.releaseDate!.compareTo(a.releaseDate!);
-          });
-      } else if (tab == 'Trending') {
-        _filteredAgents = _allAgents.reversed.toList();
-      } else {
-        _filteredAgents = _allAgents.where((agent) {
-          final roleName = agent.role != null
-              ? displayNameValues.reverse[agent.role!.displayName]
-              : '';
-          return roleName?.toLowerCase() == tab.toLowerCase();
-        }).toList();
-      }
+      _filteredAgents = filterAgentsForTab(_allAgents, tab);
     });
   }
 
@@ -77,8 +61,10 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(width: 40),
                       const ValorantLogo(size: 32),
                       IconButton(
-                        icon: const Icon(Icons.info_outline,
-                            color: Colors.white70),
+                        icon: const Icon(
+                          Icons.info_outline,
+                          color: Colors.white70,
+                        ),
                         onPressed: () {
                           Navigator.pushNamed(context, AppRouting.about);
                         },
@@ -153,8 +139,9 @@ class _HomePageState extends State<HomePage> {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
-                      child:
-                          CircularProgressIndicator(color: Color(0xFFFD4556)),
+                      child: CircularProgressIndicator(
+                        color: Color(0xFFFD4556),
+                      ),
                     );
                   }
 
@@ -163,8 +150,11 @@ class _HomePageState extends State<HomePage> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.error_outline,
-                              color: Color(0xFFFD4556), size: 48),
+                          const Icon(
+                            Icons.error_outline,
+                            color: Color(0xFFFD4556),
+                            size: 48,
+                          ),
                           const SizedBox(height: 12),
                           const Text(
                             'Gagal memuat data agen',
@@ -180,8 +170,10 @@ class _HomePageState extends State<HomePage> {
                                 _agentsFuture = ApiService.getAgents();
                               });
                             },
-                            child: const Text('Coba Lagi',
-                                style: TextStyle(color: Colors.white)),
+                            child: const Text(
+                              'Coba Lagi',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                         ],
                       ),
@@ -190,25 +182,30 @@ class _HomePageState extends State<HomePage> {
 
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return const Center(
-                      child: Text('Data agen tidak ditemukan.',
-                          style: TextStyle(color: Colors.white70)),
+                      child: Text(
+                        'Data agen tidak ditemukan.',
+                        style: TextStyle(color: Colors.white70),
+                      ),
                     );
                   }
 
                   if (_allAgents.isEmpty) {
                     _allAgents = snapshot.data!;
-                    _filteredAgents = _allAgents;
+                    _filteredAgents = filterAgentsForTab(
+                      _allAgents,
+                      _selectedTab,
+                    );
                   }
 
                   return GridView.builder(
                     padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 14,
-                      mainAxisSpacing: 14,
-                      childAspectRatio: 0.80,
-                    ),
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 14,
+                          mainAxisSpacing: 14,
+                          childAspectRatio: 0.80,
+                        ),
                     itemCount: _filteredAgents.length,
                     itemBuilder: (context, index) {
                       final agent = _filteredAgents[index];
@@ -238,18 +235,17 @@ class AgentCardWidget extends StatelessWidget {
   final Datum agent;
   final VoidCallback onTap;
 
-  const AgentCardWidget({
-    super.key,
-    required this.agent,
-    required this.onTap,
-  });
+  const AgentCardWidget({super.key, required this.agent, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final roleName = agent.role != null
         ? displayNameValues.reverse[agent.role!.displayName] ?? ''
         : '';
-    final cardColor = getAgentThemeColor(agent.displayName, agent.role?.displayName);
+    final cardColor = getAgentThemeColor(
+      agent.displayName,
+      agent.role?.displayName,
+    );
 
     return GestureDetector(
       onTap: onTap,
@@ -276,6 +272,7 @@ class AgentCardWidget extends StatelessWidget {
                   child: Image.network(
                     agent.background!,
                     fit: BoxFit.cover,
+                    cacheWidth: 600,
                     errorBuilder: (context, error, stackTrace) =>
                         const SizedBox(),
                   ),
@@ -290,11 +287,9 @@ class AgentCardWidget extends StatelessWidget {
               child: Image.network(
                 agent.fullPortrait ?? agent.displayIcon ?? '',
                 fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => const Icon(
-                  Icons.person,
-                  size: 70,
-                  color: Colors.white30,
-                ),
+                cacheWidth: 600,
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.person, size: 70, color: Colors.white30),
               ),
             ),
             // Bottom Name and Role
@@ -390,9 +385,7 @@ class ValorantLogo extends StatelessWidget {
     return SizedBox(
       width: size,
       height: size,
-      child: CustomPaint(
-        painter: _ValorantLogoPainter(),
-      ),
+      child: CustomPaint(painter: _ValorantLogoPainter()),
     );
   }
 }

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui' as ui;
 import 'dart:typed_data';
 
 // Script to generate Valorant-themed launcher icons for Android
@@ -23,19 +22,19 @@ Future<void> main() async {
     if (!dir.existsSync()) dir.createSync(recursive: true);
     final file = File('${dir.path}/ic_launcher.png');
     file.writeAsBytesSync(pngBytes);
-    print('Generated ${file.path} (${size}x$size)');
+    stdout.writeln('Generated ${file.path} (${size}x$size)');
   }
 
   // Also generate web icon
   final webIcon = _generateValorantIcon(192);
   File('web/icons/Icon-192.png').writeAsBytesSync(webIcon);
-  print('Generated web/icons/Icon-192.png');
+  stdout.writeln('Generated web/icons/Icon-192.png');
 
   final webIcon512 = _generateValorantIcon(512);
   File('web/icons/Icon-512.png').writeAsBytesSync(webIcon512);
-  print('Generated web/icons/Icon-512.png');
+  stdout.writeln('Generated web/icons/Icon-512.png');
 
-  print('\nDone! All icons generated.');
+  stdout.writeln('\nDone! All icons generated.');
 }
 
 Uint8List _generateValorantIcon(int size) {

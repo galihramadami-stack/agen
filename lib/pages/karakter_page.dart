@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import '../models/agen_vaLorant.dart';
+
+import '../models/valorant_agent.dart';
 import '../services/api_service.dart';
 import '../routes/app_routing.dart';
+import '../utils/agent_filter.dart';
 import 'home_page.dart';
 
 class KarakterPage extends StatefulWidget {
@@ -36,25 +38,7 @@ class _KarakterPageState extends State<KarakterPage> {
   void _onTabSelected(String tab) {
     setState(() {
       _selectedTab = tab;
-      if (tab == 'Popular') {
-        _filteredAgents = _allAgents;
-      } else if (tab == 'New One') {
-        _filteredAgents = List.from(_allAgents)
-          ..sort((a, b) {
-            if (a.releaseDate == null) return 1;
-            if (b.releaseDate == null) return -1;
-            return b.releaseDate!.compareTo(a.releaseDate!);
-          });
-      } else if (tab == 'Trending') {
-        _filteredAgents = _allAgents.reversed.toList();
-      } else {
-        _filteredAgents = _allAgents.where((agent) {
-          final roleName = agent.role != null
-              ? displayNameValues.reverse[agent.role!.displayName]
-              : '';
-          return roleName?.toLowerCase() == tab.toLowerCase();
-        }).toList();
-      }
+      _filteredAgents = filterAgentsForTab(_allAgents, tab);
     });
   }
 
@@ -75,8 +59,11 @@ class _KarakterPageState extends State<KarakterPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new,
-                            color: Colors.white70, size: 20),
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new,
+                          color: Colors.white70,
+                          size: 20,
+                        ),
                         onPressed: () => Navigator.pop(context),
                       ),
                       const ValorantLogo(size: 32),
@@ -148,8 +135,9 @@ class _KarakterPageState extends State<KarakterPage> {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
-                      child:
-                          CircularProgressIndicator(color: Color(0xFFFD4556)),
+                      child: CircularProgressIndicator(
+                        color: Color(0xFFFD4556),
+                      ),
                     );
                   }
 
@@ -158,8 +146,11 @@ class _KarakterPageState extends State<KarakterPage> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.error_outline,
-                              color: Color(0xFFFD4556), size: 48),
+                          const Icon(
+                            Icons.error_outline,
+                            color: Color(0xFFFD4556),
+                            size: 48,
+                          ),
                           const SizedBox(height: 12),
                           const Text(
                             'Gagal memuat data agen',
@@ -172,25 +163,30 @@ class _KarakterPageState extends State<KarakterPage> {
 
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return const Center(
-                      child: Text('Data agen tidak ditemukan.',
-                          style: TextStyle(color: Colors.white70)),
+                      child: Text(
+                        'Data agen tidak ditemukan.',
+                        style: TextStyle(color: Colors.white70),
+                      ),
                     );
                   }
 
                   if (_allAgents.isEmpty) {
                     _allAgents = snapshot.data!;
-                    _filteredAgents = _allAgents;
+                    _filteredAgents = filterAgentsForTab(
+                      _allAgents,
+                      _selectedTab,
+                    );
                   }
 
                   return GridView.builder(
                     padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 14,
-                      mainAxisSpacing: 14,
-                      childAspectRatio: 0.80,
-                    ),
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 14,
+                          mainAxisSpacing: 14,
+                          childAspectRatio: 0.80,
+                        ),
                     itemCount: _filteredAgents.length,
                     itemBuilder: (context, index) {
                       final agent = _filteredAgents[index];

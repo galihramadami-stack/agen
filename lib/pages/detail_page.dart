@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/agen_vaLorant.dart';
+
+import '../models/valorant_agent.dart';
 import 'home_page.dart';
 
 class DetailPage extends StatelessWidget {
@@ -15,10 +16,7 @@ class DetailPage extends StatelessWidget {
     if (currentAgent == null) {
       return Scaffold(
         backgroundColor: const Color(0xFF0F1722),
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-        ),
+        appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
         body: const Center(
           child: Text(
             'Data agen tidak ditemukan.',
@@ -42,7 +40,11 @@ class DetailPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.white,
+            size: 20,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -77,6 +79,7 @@ class DetailPage extends StatelessWidget {
                         child: Image.network(
                           currentAgent.background!,
                           fit: BoxFit.cover,
+                          cacheWidth: 1200,
                           errorBuilder: (context, error, stackTrace) =>
                               const SizedBox(),
                         ),
@@ -107,7 +110,8 @@ class DetailPage extends StatelessWidget {
                               vertical: 5,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF101724).withValues(alpha: 0.65),
+                              color: const Color(0xFF101724)
+                                  .withValues(alpha: 0.65),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -134,8 +138,12 @@ class DetailPage extends StatelessWidget {
                           currentAgent.displayIcon ??
                           '',
                       fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.person, size: 80, color: Colors.white30),
+                      cacheWidth: 600,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.person,
+                        size: 80,
+                        color: Colors.white30,
+                      ),
                     ),
                   ),
                 ],
@@ -211,12 +219,19 @@ class DetailPage extends StatelessWidget {
                             ? Image.network(
                                 ability.displayIcon!,
                                 color: Colors.white,
+                                cacheWidth: 128,
                                 errorBuilder: (context, error, stackTrace) =>
-                                    const Icon(Icons.flash_on,
-                                        color: Colors.white70, size: 22),
+                                    const Icon(
+                                      Icons.flash_on,
+                                      color: Colors.white70,
+                                      size: 22,
+                                    ),
                               )
-                            : const Icon(Icons.flash_on,
-                                color: Colors.white70, size: 22),
+                            : const Icon(
+                                Icons.flash_on,
+                                color: Colors.white70,
+                                size: 22,
+                              ),
                       ),
                       const SizedBox(width: 14),
                       // Ability Name & Description
